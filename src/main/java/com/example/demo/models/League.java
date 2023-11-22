@@ -11,20 +11,18 @@ public class League {
     private String name;
     private String type;
     private String logo;
+    private String country;
 
 
-    public League(String id, String name, String type, String logo) {
-        this.id = id;
+
+    public League(String name, String type, String logo, String country) {
         this.name = name;
         this.type = type;
         this.logo = logo;
+        this.country = country;
     }
 
-    public League(String name, String type, String logo) {
-        this.name = name;
-        this.type = type;
-        this.logo = logo;
-    }
+
 
     public String getId() {
         return id;
