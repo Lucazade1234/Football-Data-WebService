@@ -29,7 +29,6 @@ public class Controller {
 
     @GetMapping("/{country}/leagues")
     public List<League> getLeaguesByCountry(@PathVariable String country) throws InterruptedException {
-
         return leagueService.getLeagues(country);
     }
 

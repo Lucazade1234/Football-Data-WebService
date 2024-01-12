@@ -10,6 +10,7 @@ public class Country {
 
     @Id
     private String id;
+    private int countryID;
     private String name;
     private String flag;
     private String code;
@@ -23,6 +24,22 @@ public class Country {
 
     public Country() {
 
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public int getCountryID() {
+        return countryID;
+    }
+
+    public void setCountryID(int countryID) {
+        this.countryID = countryID;
     }
 
     public String getName() {

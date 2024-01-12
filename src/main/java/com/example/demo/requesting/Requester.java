@@ -19,7 +19,8 @@ import java.util.ArrayList;
 public class Requester {
     public static void main(String[] args) throws IOException, InterruptedException {
        Requester requester = new Requester();
-       System.out.println(requester.requestLeagues("France"));
+       System.out.println(requester.requestLeagues("England"));
+
 
     }
 
@@ -80,6 +81,7 @@ public class Requester {
                         if (element.get("league").get("type").asText().equals("League")){
                             //add league data to array list
                             League league = new League(element.get("league").get("name").asText(),
+                                    element.get("league").get("id").asInt(),
                                     element.get("league").get("type").asText(),
                                     element.get("league").get("logo").asText(),
                                     element.get("country").get("name").asText());
@@ -104,6 +106,62 @@ public class Requester {
 
         // return array list of leagues
         //System.out.println(leagues);
+        return leagues;
+
+    }
+
+
+    public ArrayList<League> requestTeam(String country, String teamName) throws InterruptedException {
+        ArrayList<League> leagues = new ArrayList<>();
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api-football-v1.p.rapidapi.com/v3/teams?name=" + teamName +"&country=" + country))
+                    .header("X-RapidAPI-Key", "beb2d7eac8msh58aa520e5aa67c7p187818jsndadd4a0969ce")
+                    .header("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
+                    .method("GET", HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+
+
+
+            try {
+                // Parse the JSON response
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonObject = objectMapper.readTree(response.body());
+                JsonNode jsonArray = jsonObject.get("response");
+
+                // Check if the parsed JSON is an array
+                if (jsonObject.isObject()) {
+                    // Iterate through the array elements
+                    for (JsonNode element : jsonArray) {
+                        if (element.get("league").get("type").asText().equals("League")){
+                            //add league data to array list
+                            League league = new League(element.get("league").get("name").asText(),
+                                    element.get("league").get("id").asInt(),
+                                    element.get("league").get("type").asText(),
+                                    element.get("league").get("logo").asText(),
+                                    element.get("country").get("name").asText());
+
+                            leagues.add(league);
+                        }
+
+                    }
+                } else {
+                    System.out.println("The JSON response is not an array.");
+                    return leagues;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
         return leagues;
 
     }
