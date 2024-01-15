@@ -140,6 +140,7 @@ public class Requester {
                         //add team data to array list
                         Team team = new Team(element.get("team").get("name").asText(),
                                 leagueID,
+                                element.get("team").get("id").asInt(),
                                 element.get("team").get("country").asText(),
                                 element.get("team").get("founded").asInt(),
                                 element.get("team").get("logo").asText(),

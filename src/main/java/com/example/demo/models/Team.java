@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Team {
     @Id
     private String id;
+    private int teamID;
     private int leagueID;
     private String name;
     private String country;
@@ -21,13 +22,13 @@ public class Team {
     private String image;
 
 
-
     public Team() {
     }
 
-    public Team(String name, int leagueID, String country, int founded, String logo, String ground, String city, int capacity, String image) {
+    public Team(String name, int leagueID, int teamID, String country, int founded, String logo, String ground, String city, int capacity, String image) {
         this.setName(name);
         this.setLeagueID(leagueID);
+        this.setTeamID(teamID);
         this.setCountry(country);
         this.setFounded(founded);
         this.setLogo(logo);
@@ -37,6 +38,21 @@ public class Team {
         this.setImage(image);
     }
 
+    public void setTeamID(int teamID) {
+        this.teamID = teamID;
+    }
+
+    public void setLeagueID(int leagueID) {
+        this.leagueID = leagueID;
+    }
+
+    public int getTeamID() {
+        return teamID;
+    }
+
+    public int getLeagueID() {
+        return leagueID;
+    }
 
     public String getId() {
         return id;
