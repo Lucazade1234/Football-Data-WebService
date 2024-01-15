@@ -1,7 +1,16 @@
 package com.example.demo.models;
 
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Data
+@Document(collection = "Teams")
 public class Team {
-    private int id;
+    @Id
+    private String id;
+    private int leagueID;
     private String name;
     private String country;
     private int founded;
@@ -12,7 +21,24 @@ public class Team {
     private String image;
 
 
-    public int getId() {
+
+    public Team() {
+    }
+
+    public Team(String name, int leagueID, String country, int founded, String logo, String ground, String city, int capacity, String image) {
+        this.setName(name);
+        this.setLeagueID(leagueID);
+        this.setCountry(country);
+        this.setFounded(founded);
+        this.setLogo(logo);
+        this.setGround(ground);
+        this.setCity(city);
+        this.setCapacity(capacity);
+        this.setImage(image);
+    }
+
+
+    public String getId() {
         return id;
     }
 
@@ -48,7 +74,7 @@ public class Team {
         return image;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
