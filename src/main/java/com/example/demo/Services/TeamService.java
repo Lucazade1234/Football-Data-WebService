@@ -23,6 +23,8 @@ public class TeamService {
         if(teamRepository.findTeamsByCountryAndLeagueID(country, leagueID).isEmpty()){
             System.out.println("No teams found for this league");
             teamRepository.saveAll(requester.requestTeams(country, leagueID));
+        } else{
+            System.out.println("data found");
         }
         return teamRepository.findTeamsByCountryAndLeagueID(country,leagueID);
     }
