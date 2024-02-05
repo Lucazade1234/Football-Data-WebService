@@ -1,13 +1,7 @@
 package com.example.demo.controllers;
 
-import com.example.demo.Services.CountryService;
-import com.example.demo.Services.LeagueService;
-import com.example.demo.Services.TeamService;
-import com.example.demo.Services.TeamStatService;
-import com.example.demo.models.Country;
-import com.example.demo.models.League;
-import com.example.demo.models.Team;
-import com.example.demo.models.TeamStat;
+import com.example.demo.Services.*;
+import com.example.demo.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +25,8 @@ public class Controller {
 
     @Autowired
     private TeamStatService teamStatService;
+    @Autowired
+    private SquadService squadService;
 
     @GetMapping("/countries")
     public List<Country> getCountries() {
@@ -52,7 +48,11 @@ public class Controller {
         return teamStatService.getTeamStats(leagueID, teamID);
    }
 
-   //@GetMapping(/)
+   @GetMapping("/{teamID}/squad")
+   public Squad getTeamSquad(@PathVariable int teamID) throws InterruptedException {
+        return squadService.getSquad(teamID);
+   }
+
 
     @GetMapping("/leagues")
     public List<League> getAllLeagues(){

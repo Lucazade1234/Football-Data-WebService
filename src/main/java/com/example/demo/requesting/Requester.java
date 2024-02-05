@@ -1,8 +1,6 @@
 package com.example.demo.requesting;
 
-import com.example.demo.models.League;
-import com.example.demo.models.Team;
-import com.example.demo.models.TeamStat;
+import com.example.demo.models.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.json.JsonObject;
@@ -10,6 +8,7 @@ import org.bson.json.JsonObject;
 import java.io.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
@@ -25,7 +24,8 @@ public class Requester {
         Requester requester = new Requester();
         //System.out.println(requester.requestLeagues("England"));
         //System.out.println("request teams: " + requester.requestTeams("England", 39));
-        System.out.println("request teamstats: "  + requester.requestTeamStats(33, 39));
+        //System.out.println("request teamstats: "  + requester.requestTeamStats(33, 39));
+        System.out.println(requester.requestPlayersByTeam(42).toString());
 
 
     }
@@ -415,6 +415,198 @@ public class Requester {
 
         return teamStat;
 
+    }
+
+
+
+    public Squad requestPlayersByTeam(int teamID) throws InterruptedException {
+        ArrayList<SquadMember> players = new ArrayList<>();
+        String teamName = null;
+        Requester requester = new Requester();
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api-football-v1.p.rapidapi.com/v3/players/squads?team=" + teamID))
+                    .header("X-RapidAPI-Key", "beb2d7eac8msh58aa520e5aa67c7p187818jsndadd4a0969ce")
+                    .header("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
+                    .method("GET", HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+
+
+
+            try {
+                // Parse the JSON response
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonObject = objectMapper.readTree(response.body());
+                JsonNode jsonArray = jsonObject.get("response");
+                System.out.println(jsonObject.get("response"));
+
+
+                for(JsonNode node : jsonArray){
+                    JsonNode playerList = node.get("players");
+                    teamName = node.get("team").get("name").asText();
+
+                    for(JsonNode player : playerList){
+                        int id = player.get("id").asInt();
+                        String name = player.get("name").asText();
+                        int age = player.get("age").asInt();
+                        int number = player.get("number").asInt();
+                        String position = player.get("position").asText();
+                        String photo = player.get("photo").asText();
+
+                        SquadMember p = new SquadMember(id, name, age, number, position, photo);
+                        players.add(p);
+                    }
+                }
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+        return new Squad (teamID, players, teamName);
+
+    }
+
+    public Player requestPlayerStatsByPlayerID(int playerID) {
+        Player player = new Player();
+
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api-football-v1.p.rapidapi.com/v3/players?id=" + playerID + "&season=2023"))
+                    .header("X-RapidAPI-Key", "beb2d7eac8msh58aa520e5aa67c7p187818jsndadd4a0969ce")
+                    .header("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
+                    .method("GET", HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+
+
+
+            try {
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonObject = objectMapper.readTree(response.body());
+                JsonNode jsonArray = jsonObject.get("response");
+
+                for(JsonNode element : jsonArray){
+
+                    player.setPlayerID(element.get("player").get("id").asInt());
+                    player.setFirstname(element.get("player").get("firstname").asText());
+                    player.setLastname(element.get("player").get("lastname").asText());
+                    player.setPlayerID(element.get("player").get("age").asInt());
+                    player.setDob(element.get("player").get("birth").get("date").asText());
+                    player.setPlaceOfBirth(element.get("player").get("birth").get("place").asText());
+                    player.setNationality(element.get("player").get("nationality").asText());
+                    player.setHeight(element.get("player").get("height").asText());
+                    player.setWeight(element.get("player").get("weight").asText());
+                    player.setInjured(element.get("player").get("injured").asBoolean());
+                    player.setPhoto(element.get("player").get("photo").asText());
+
+                    JsonNode statistics = element.get("statistics");
+
+                    for(JsonNode statistic : statistics){
+
+                        if (statistic.get("league").get("name").asText().equals("Premier League")){
+                            player.setPlayerStats(new PlayerStat(
+                                    new PlayerStat.Team(
+                                            statistic.get("team").get("id").asInt(),
+                                            statistic.get("team").get("name").asText(),
+                                            statistic.get("team").get("logo").asText()
+                                    ),
+                                    new PlayerStat.League(
+                                            statistic.get("league").get("id").asInt(),
+                                            statistic.get("league").get("name").asText(),
+                                            statistic.get("league").get("country").asText(),
+                                            statistic.get("league").get("logo").asText(),
+                                            statistic.get("league").get("flag").asText(),
+                                            statistic.get("league").get("season").asInt()
+                                    ),
+                                    new PlayerStat.Games(
+                                            statistic.get("games").get("appearences").asInt(),
+                                            statistic.get("games").get("lineups").asInt(),
+                                            statistic.get("games").get("minutes").asInt(),
+                                            statistic.get("games").get("position").asText(),
+                                            statistic.get("games").get("rating").asText(),
+                                            statistic.get("games").get("captain").asBoolean()
+                                    ),
+                                    new PlayerStat.Substitutes(
+                                            statistic.get("substitutes").get("in").asInt(),
+                                            statistic.get("substitutes").get("out").asInt(),
+                                            statistic.get("substitutes").get("bench").asInt()
+                                    ),
+                                    new PlayerStat.Shots(
+                                            statistic.get("shots").get("total").asInt(),
+                                            statistic.get("shots").get("on").asInt()
+                                    ),
+                                    new PlayerStat.Goals(
+                                            statistic.get("goals").get("total").asInt(),
+                                            statistic.get("goals").get("conceded").asInt(),
+                                            statistic.get("goals").get("assists").asInt(),
+                                            statistic.get("goals").get("saves").asInt()
+                                    ),
+                                    new PlayerStat.Passes(
+                                            statistic.get("passes").get("total").asInt(),
+                                            statistic.get("passes").get("key").asInt(),
+                                            statistic.get("passes").get("accuracy").asInt()
+                                    ),
+                                    new PlayerStat.Tackles(
+                                            statistic.get("tackles").get("total").asInt(),
+                                            statistic.get("tackles").get("blocks").asInt(),
+                                            statistic.get("tackles").get("interceptions").asInt()
+                                    ),
+                                    new PlayerStat.Duels(
+                                            statistic.get("duels").get("total").asInt(),
+                                            statistic.get("duels").get("won").asInt()
+                                    ),
+                                    new PlayerStat.Dribbles(
+                                            statistic.get("dribbles").get("attempts").asInt(),
+                                            statistic.get("dribbles").get("success").asInt(),
+                                            statistic.get("dribbles").get("past").asInt()
+                                    ),
+                                    new PlayerStat.Fouls(
+                                            statistic.get("fouls").get("drawn").asInt(),
+                                            statistic.get("fouls").get("committed").asInt()
+                                    ),
+                                    new PlayerStat.Cards(
+                                            statistic.get("cards").get("yellow").asInt(),
+                                            statistic.get("cards").get("yellowred").asInt(),
+                                            statistic.get("cards").get("red").asInt()
+                                    ),
+                                    new PlayerStat.Penalty(
+                                            statistic.get("penalty").get("won").asInt(),
+                                            statistic.get("penalty").get("committed").asInt(),
+                                            statistic.get("penalty").get("scored").asInt(),
+                                            statistic.get("penalty").get("missed").asInt(),
+                                            statistic.get("penalty").get("saved").asInt()
+                                    )
+
+                            ));
+
+                        }
+                    }
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+        return player;
     }
 
 
