@@ -25,8 +25,12 @@ public class Controller {
 
     @Autowired
     private TeamStatService teamStatService;
+
     @Autowired
     private SquadService squadService;
+
+    @Autowired
+    private PlayerService playerService;
 
     @GetMapping("/countries")
     public List<Country> getCountries() {
@@ -43,19 +47,23 @@ public class Controller {
         return teamService.getTeams(country, leagueID);
     }
 
-   @GetMapping("/{leagueID}/{teamID}/TeamStats")
-   public TeamStat getTeamStats(@PathVariable int leagueID, @PathVariable int teamID ) throws InterruptedException {
+    @GetMapping("/{leagueID}/{teamID}/TeamStats")
+    public TeamStat getTeamStats(@PathVariable int leagueID, @PathVariable int teamID) throws InterruptedException {
         return teamStatService.getTeamStats(leagueID, teamID);
-   }
+    }
 
-   @GetMapping("/{teamID}/squad")
-   public Squad getTeamSquad(@PathVariable int teamID) throws InterruptedException {
+    @GetMapping("/Squad/{teamID}")
+    public Squad getTeamSquad(@PathVariable int teamID) throws InterruptedException {
         return squadService.getSquad(teamID);
-   }
+    }
 
+    @GetMapping("/PlayerStats/{playerID}")
+    public Player getPlayerStats(@PathVariable int playerID) throws InterruptedException {
+        return playerService.getPlayer(playerID);
+    }
 
     @GetMapping("/leagues")
-    public List<League> getAllLeagues(){
+    public List<League> getAllLeagues() {
         return leagueService.getAllLeagues();
     }
 

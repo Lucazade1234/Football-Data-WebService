@@ -14,7 +14,7 @@ import java.util.ArrayList;
 @Document(collection = "Squads")
 public class Squad {
     @Id
-    private int id;
+    private String id;
     private int teamID;
     private ArrayList<SquadMember> squadMembers;
     private String teamName;

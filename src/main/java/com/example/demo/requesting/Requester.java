@@ -25,7 +25,7 @@ public class Requester {
         //System.out.println(requester.requestLeagues("England"));
         //System.out.println("request teams: " + requester.requestTeams("England", 39));
         //System.out.println("request teamstats: "  + requester.requestTeamStats(33, 39));
-        System.out.println(requester.requestPlayersByTeam(42).toString());
+        System.out.println(requester.requestPlayerStatsByPlayerID(633));
 
 
     }
@@ -487,7 +487,7 @@ public class Requester {
                     .method("GET", HttpRequest.BodyPublishers.noBody())
                     .build();
             HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body());
+            //System.out.println(response.body());
 
 
 
@@ -502,7 +502,7 @@ public class Requester {
                     player.setPlayerID(element.get("player").get("id").asInt());
                     player.setFirstname(element.get("player").get("firstname").asText());
                     player.setLastname(element.get("player").get("lastname").asText());
-                    player.setPlayerID(element.get("player").get("age").asInt());
+                    player.setAge(element.get("player").get("age").asInt());
                     player.setDob(element.get("player").get("birth").get("date").asText());
                     player.setPlaceOfBirth(element.get("player").get("birth").get("place").asText());
                     player.setNationality(element.get("player").get("nationality").asText());
@@ -512,87 +512,84 @@ public class Requester {
                     player.setPhoto(element.get("player").get("photo").asText());
 
                     JsonNode statistics = element.get("statistics");
+                    JsonNode statistic = statistics.get(0);
 
-                    for(JsonNode statistic : statistics){
-
-                        if (statistic.get("league").get("name").asText().equals("Premier League")){
-                            player.setPlayerStats(new PlayerStat(
+                    player.setPlayerStats(new PlayerStat(
                                     new PlayerStat.Team(
-                                            statistic.get("team").get("id").asInt(),
-                                            statistic.get("team").get("name").asText(),
-                                            statistic.get("team").get("logo").asText()
+                                            getJsonValueAsInt(statistic.get("team"), "id"),
+                                            getJsonValueAsString(statistic.get("team"), "name"),
+                                            getJsonValueAsString(statistic.get("team"), "logo")
                                     ),
                                     new PlayerStat.League(
-                                            statistic.get("league").get("id").asInt(),
-                                            statistic.get("league").get("name").asText(),
-                                            statistic.get("league").get("country").asText(),
-                                            statistic.get("league").get("logo").asText(),
-                                            statistic.get("league").get("flag").asText(),
-                                            statistic.get("league").get("season").asInt()
+                                            getJsonValueAsInt(statistic.get("league"), "id"),
+                                            getJsonValueAsString(statistic.get("league"), "name"),
+                                            getJsonValueAsString(statistic.get("league"), "country"),
+                                            getJsonValueAsString(statistic.get("league"), "logo"),
+                                            getJsonValueAsString(statistic.get("league"), "flag"),
+                                            getJsonValueAsInt(statistic.get("league"), "season")
                                     ),
                                     new PlayerStat.Games(
-                                            statistic.get("games").get("appearences").asInt(),
-                                            statistic.get("games").get("lineups").asInt(),
-                                            statistic.get("games").get("minutes").asInt(),
-                                            statistic.get("games").get("position").asText(),
-                                            statistic.get("games").get("rating").asText(),
+                                            getJsonValueAsInt(statistic.get("games"), "appearences"),
+                                            getJsonValueAsInt(statistic.get("games"), "lineups"),
+                                            getJsonValueAsInt(statistic.get("games"), "minutes"),
+                                            getJsonValueAsString(statistic.get("games"), "number"),
+                                            getJsonValueAsString(statistic.get("games"), "position"),
                                             statistic.get("games").get("captain").asBoolean()
                                     ),
                                     new PlayerStat.Substitutes(
-                                            statistic.get("substitutes").get("in").asInt(),
-                                            statistic.get("substitutes").get("out").asInt(),
-                                            statistic.get("substitutes").get("bench").asInt()
+                                            getJsonValueAsInt(statistic.get("substitutes"), "in"),
+                                            getJsonValueAsInt(statistic.get("substitutes"), "out"),
+                                            getJsonValueAsInt(statistic.get("substitutes"), "bench")
                                     ),
                                     new PlayerStat.Shots(
-                                            statistic.get("shots").get("total").asInt(),
-                                            statistic.get("shots").get("on").asInt()
+                                            getJsonValueAsInt(statistic.get("shots"), "total"),
+                                            getJsonValueAsInt(statistic.get("shots"), "on")
                                     ),
                                     new PlayerStat.Goals(
-                                            statistic.get("goals").get("total").asInt(),
-                                            statistic.get("goals").get("conceded").asInt(),
-                                            statistic.get("goals").get("assists").asInt(),
-                                            statistic.get("goals").get("saves").asInt()
+                                            getJsonValueAsInt(statistic.get("goals"), "total"),
+                                            getJsonValueAsInt(statistic.get("goals"), "conceded"),
+                                            getJsonValueAsInt(statistic.get("goals"), "assists"),
+                                            getJsonValueAsInt(statistic.get("goals"), "saves")
                                     ),
                                     new PlayerStat.Passes(
-                                            statistic.get("passes").get("total").asInt(),
-                                            statistic.get("passes").get("key").asInt(),
-                                            statistic.get("passes").get("accuracy").asInt()
+                                            getJsonValueAsInt(statistic.get("passes"), "total"),
+                                            getJsonValueAsInt(statistic.get("passes"), "key"),
+                                            getJsonValueAsInt(statistic.get("passes"), "accuracy")
                                     ),
                                     new PlayerStat.Tackles(
-                                            statistic.get("tackles").get("total").asInt(),
-                                            statistic.get("tackles").get("blocks").asInt(),
-                                            statistic.get("tackles").get("interceptions").asInt()
+                                            getJsonValueAsInt(statistic.get("tackles"), "total"),
+                                            getJsonValueAsInt(statistic.get("tackles"), "blocks"),
+                                            getJsonValueAsInt(statistic.get("tackles"), "interceptions")
                                     ),
                                     new PlayerStat.Duels(
-                                            statistic.get("duels").get("total").asInt(),
-                                            statistic.get("duels").get("won").asInt()
+                                            getJsonValueAsInt(statistic.get("duels"), "total"),
+                                            getJsonValueAsInt(statistic.get("duels"), "won")
                                     ),
                                     new PlayerStat.Dribbles(
-                                            statistic.get("dribbles").get("attempts").asInt(),
-                                            statistic.get("dribbles").get("success").asInt(),
-                                            statistic.get("dribbles").get("past").asInt()
+                                            getJsonValueAsInt(statistic.get("dribbles"), "attempts"),
+                                            getJsonValueAsInt(statistic.get("dribbles"), "success"),
+                                            getJsonValueAsInt(statistic.get("dribbles"), "past")
                                     ),
                                     new PlayerStat.Fouls(
-                                            statistic.get("fouls").get("drawn").asInt(),
-                                            statistic.get("fouls").get("committed").asInt()
+                                            getJsonValueAsInt(statistic.get("fouls"), "drawn"),
+                                            getJsonValueAsInt(statistic.get("fouls"), "committed")
                                     ),
                                     new PlayerStat.Cards(
-                                            statistic.get("cards").get("yellow").asInt(),
-                                            statistic.get("cards").get("yellowred").asInt(),
-                                            statistic.get("cards").get("red").asInt()
+                                            getJsonValueAsInt(statistic.get("cards"), "yellow"),
+                                            getJsonValueAsInt(statistic.get("cards"), "yellowred"),
+                                            getJsonValueAsInt(statistic.get("cards"), "red")
                                     ),
                                     new PlayerStat.Penalty(
-                                            statistic.get("penalty").get("won").asInt(),
-                                            statistic.get("penalty").get("committed").asInt(),
-                                            statistic.get("penalty").get("scored").asInt(),
-                                            statistic.get("penalty").get("missed").asInt(),
-                                            statistic.get("penalty").get("saved").asInt()
+                                            getJsonValueAsInt(statistic.get("penalty"), "won"),
+                                            getJsonValueAsInt(statistic.get("penalty"), "committed"),
+                                            getJsonValueAsInt(statistic.get("penalty"), "scored"),
+                                            getJsonValueAsInt(statistic.get("penalty"), "missed"),
+                                            getJsonValueAsInt(statistic.get("penalty"), "saved")
                                     )
-
                             ));
 
-                        }
-                    }
+
+
 
                 }
             } catch (Exception e) {
@@ -608,6 +605,18 @@ public class Requester {
 
         return player;
     }
+
+
+    private int getJsonValueAsInt(JsonNode node, String fieldName) {
+        JsonNode fieldNode = node.get(fieldName);
+        return (fieldNode != null) ? fieldNode.asInt() : 0;
+    }
+
+    private String getJsonValueAsString(JsonNode node, String fieldName) {
+        JsonNode fieldNode = node.get(fieldName);
+        return (fieldNode != null) ? fieldNode.asText() : "0";
+    }
+
 
 
 }
