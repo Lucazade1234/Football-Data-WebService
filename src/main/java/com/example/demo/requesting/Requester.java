@@ -25,7 +25,8 @@ public class Requester {
         //System.out.println(requester.requestLeagues("England"));
         //System.out.println("request teams: " + requester.requestTeams("England", 39));
         //System.out.println("request teamstats: "  + requester.requestTeamStats(33, 39));
-        System.out.println(requester.requestPlayerStatsByPlayerID(633));
+        //System.out.println(requester.requestPlayerStatsByPlayerID(633));
+        System.out.println(requester.requestTeamFixtures(42, 39));
 
 
     }
@@ -606,6 +607,109 @@ public class Requester {
         return player;
     }
 
+
+    public ArrayList<Fixture> requestTeamFixtures(int teamID, int leagueID){
+        ArrayList<Fixture> fixtures = new ArrayList<>();
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api-football-v1.p.rapidapi.com/v3/fixtures?league=" + leagueID + "&season=2023&team=" + teamID))
+                    .header("X-RapidAPI-Key", "beb2d7eac8msh58aa520e5aa67c7p187818jsndadd4a0969ce")
+                    .header("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
+                    .method("GET", HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            //System.out.println(response.body());
+
+
+
+            try {
+                // Parse the JSON response
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonObject = objectMapper.readTree(response.body());
+                JsonNode jsonArray = jsonObject.get("response");
+                System.out.println(jsonObject.get("response"));
+
+                for(JsonNode element : jsonArray){
+
+                    Fixture fixture = new Fixture(
+                            element.get("fixture").get("id").asInt(),
+                            element.get("fixture").get("referee").asText(),
+                            element.get("fixture").get("timezone").asText(),
+                            element.get("fixture").get("date").asText(),
+                            element.get("fixture").get("timestamp").asInt(),
+                            new Venue(
+                                    element.get("fixture").get("venue").get("id").asInt(),
+                                    element.get("fixture").get("venue").get("name").asText(),
+                                    element.get("fixture").get("venue").get("city").asText()
+                            ),
+                            new Status(
+                                    element.get("fixture").get("status").get("long").asText(),
+                                    element.get("fixture").get("status").get("short").asText(),
+                                    element.get("fixture").get("status").get("elapsed").asInt()
+                            ),
+                            new Leagueinfo(
+                                    element.get("league").get("id").asInt(),
+                                    element.get("league").get("name").asText(),
+                                    element.get("league").get("country").asText(),
+                                    element.get("league").get("logo").asText(),
+                                    element.get("league").get("flag").asText(),
+                                    element.get("league").get("season").asInt(),
+                                    element.get("league").get("round").asText()
+                            ),
+                            new Teams(
+                                    new Teaminfo(
+                                            element.get("teams").get("home").get("id").asInt(),
+                                            element.get("teams").get("home").get("name").asText(),
+                                            element.get("teams").get("home").get("logo").asText(),
+                                            element.get("teams").get("home").get("winner").asBoolean()
+                                    ),
+                                    new Teaminfo(
+                                            element.get("teams").get("away").get("id").asInt(),
+                                            element.get("teams").get("away").get("name").asText(),
+                                            element.get("teams").get("away").get("logo").asText(),
+                                            element.get("teams").get("away").get("winner").asBoolean()
+                                    )
+                            ),
+                            new Goals(
+                                    element.get("goals").get("home").asInt(),
+                                    element.get("goals").get("away").asInt()
+                            ),
+                            new Score(
+                                    new HalfTime(
+                                            element.get("score").get("halftime").get("home").asInt(),
+                                            element.get("score").get("halftime").get("away").asInt()
+                                    ),
+                                    new FullTime(
+                                            element.get("score").get("fulltime").get("home").asInt(),
+                                            element.get("score").get("fulltime").get("away").asInt()
+                                    ),
+                                    new ExtraTime(
+                                            getJsonValueAsInt(element.get("score").get("extratime"), "home"),
+                                            getJsonValueAsInt(element.get("score").get("extratime"), "away")
+                                    ),
+                                    new Penalty(
+                                            getJsonValueAsInt(element.get("score").get("penalty"), "home"),
+                                            getJsonValueAsInt(element.get("score").get("penalty"), "away")
+                                    )
+                            )
+                    );
+                     fixtures.add(fixture);
+                }
+
+
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        return fixtures;
+    }
 
     private int getJsonValueAsInt(JsonNode node, String fieldName) {
         JsonNode fieldNode = node.get(fieldName);

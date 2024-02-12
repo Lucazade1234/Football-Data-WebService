@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -31,6 +32,8 @@ public class Controller {
 
     @Autowired
     private PlayerService playerService;
+    @Autowired
+    private FixtureService fixtureService;
 
     @GetMapping("/countries")
     public List<Country> getCountries() {
@@ -57,10 +60,16 @@ public class Controller {
         return squadService.getSquad(teamID);
     }
 
+    @GetMapping("/Fixtures/{teamID}/{leagueID}")
+    public ArrayList<Fixture> getTeamFixtures(@PathVariable int teamID, @PathVariable int leagueID){
+        return fixtureService.getFixtures(teamID, leagueID);
+    }
+
     @GetMapping("/PlayerStats/{playerID}")
     public Player getPlayerStats(@PathVariable int playerID) throws InterruptedException {
         return playerService.getPlayer(playerID);
     }
+
 
     @GetMapping("/leagues")
     public List<League> getAllLeagues() {
