@@ -36,7 +36,7 @@ public class Squad {
     public String toString(){
         StringBuilder result = new StringBuilder();
         for (SquadMember squadMember : squadMembers) {
-            result.append("Player name:").append(squadMember.getName()).append("||").append("player number:").append(squadMember.getNumber()).append("\\");
+            result.append("LineupPlayer name:").append(squadMember.getName()).append("||").append("player number:").append(squadMember.getNumber()).append("\\");
         }
 
         return result.toString();

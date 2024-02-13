@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.json.JsonObject;
 
+import javax.sound.sampled.Line;
 import java.io.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -26,7 +27,7 @@ public class Requester {
         //System.out.println("request teams: " + requester.requestTeams("England", 39));
         //System.out.println("request teamstats: "  + requester.requestTeamStats(33, 39));
         //System.out.println(requester.requestPlayerStatsByPlayerID(633));
-        System.out.println(requester.requestTeamFixtures(42, 39));
+        System.out.println(requester.requestLineup(1035038));
 
 
     }
@@ -709,6 +710,115 @@ public class Requester {
         }
 
         return fixtures;
+    }
+
+
+    public ArrayList<Lineup> requestLineup(int fixtureID) throws InterruptedException {
+        ArrayList<Lineup> lineups = new ArrayList<>();
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api-football-v1.p.rapidapi.com/v3/fixtures/lineups?fixture=" + fixtureID))
+                    .header("X-RapidAPI-Key", "beb2d7eac8msh58aa520e5aa67c7p187818jsndadd4a0969ce")
+                    .header("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
+                    .method("GET", HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+
+
+
+            try {
+                // Parse the JSON response
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonObject = objectMapper.readTree(response.body());
+                JsonNode jsonArray = jsonObject.get("response");
+                System.out.println(jsonObject.get("response"));
+
+
+                for(JsonNode element : jsonArray ) {
+
+                    JsonNode teamInfo = element.get("team");
+                    Lineup.LineupTeam lineupTeam = new Lineup.LineupTeam(
+                            teamInfo.get("id").asInt(),
+                            teamInfo.get("name").asText(),
+                            teamInfo.get("logo").asText(),
+                            new Lineup.Colors(
+                                    new Lineup.Color(
+                                            teamInfo.get("colors").get("player").get("primary").asText(),
+                                            teamInfo.get("colors").get("player").get("number").asText(),
+                                            teamInfo.get("colors").get("player").get("border").asText()
+                                    ),
+                                    new Lineup.Color(
+                                            teamInfo.get("colors").get("goalkeeper").get("primary").asText(),
+                                            teamInfo.get("colors").get("goalkeeper").get("number").asText(),
+                                            teamInfo.get("colors").get("goalkeeper").get("border").asText()
+                                    )
+                            )
+                    );
+
+                    JsonNode coachInfo = element.get("coach");
+                    Lineup.LineupCoach lineupCoach = new Lineup.LineupCoach(
+                            coachInfo.get("id").asInt(),
+                            coachInfo.get("name").asText(),
+                            coachInfo.get("photo").asText()
+                    );
+
+                    String formation = element.get("formation").asText();
+
+                    JsonNode startingEleven = element.get("startXI");
+                    JsonNode substitutes = element.get("substitutes");
+
+                    List<Lineup.LineupPlayer> startXI = new ArrayList<>();
+                    List<Lineup.LineupPlayer> subs = new ArrayList<>();
+
+
+                   for (JsonNode player : startingEleven){
+
+                       Lineup.LineupPlayer lineupPlayer = new Lineup.LineupPlayer(
+                               new Lineup.LineupPlayerDetails(
+                                       player.get("player").get("id").asInt(),
+                                       player.get("player").get("name").asText(),
+                                       player.get("player").get("number").asInt(),
+                                       player.get("player").get("pos").asText(),
+                                       player.get("player").get("grid").asText()
+                               )
+                       );
+                       startXI.add(lineupPlayer);
+
+                   }
+
+                   for (JsonNode player : substitutes) {
+                       Lineup.LineupPlayer lineupPlayer = new Lineup.LineupPlayer(
+                               new Lineup.LineupPlayerDetails(
+                                       player.get("player").get("id").asInt(),
+                                       player.get("player").get("name").asText(),
+                                       player.get("player").get("number").asInt(),
+                                       player.get("player").get("pos").asText(),
+                                       player.get("player").get("grid").asText()
+                               )
+                       );
+                        subs.add(lineupPlayer);
+                   }
+
+                   lineups.add(new Lineup(fixtureID, lineupTeam, lineupCoach, formation, startXI, subs));
+
+                }
+
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+        return lineups;
+
     }
 
     private int getJsonValueAsInt(JsonNode node, String fieldName) {

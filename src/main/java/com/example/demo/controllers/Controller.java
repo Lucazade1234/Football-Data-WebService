@@ -32,8 +32,13 @@ public class Controller {
 
     @Autowired
     private PlayerService playerService;
+
     @Autowired
     private FixtureService fixtureService;
+
+    @Autowired
+    private LineupService lineupService;
+
 
     @GetMapping("/countries")
     public List<Country> getCountries() {
@@ -65,16 +70,23 @@ public class Controller {
         return fixtureService.getFixtures(teamID, leagueID);
     }
 
+    @GetMapping("/Lineups/{fixtureID}")
+    public ArrayList<Lineup> getlineups(@PathVariable int fixtureID){
+        return lineupService.getLineups(fixtureID);
+    }
+
     @GetMapping("/PlayerStats/{playerID}")
     public Player getPlayerStats(@PathVariable int playerID) throws InterruptedException {
         return playerService.getPlayer(playerID);
     }
 
 
+
     @GetMapping("/leagues")
     public List<League> getAllLeagues() {
         return leagueService.getAllLeagues();
     }
+
 
 
 }

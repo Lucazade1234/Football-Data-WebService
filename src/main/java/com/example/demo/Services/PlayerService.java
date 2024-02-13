@@ -17,7 +17,7 @@ public class PlayerService {
         Player player = playerRepository.findPlayerByPlayerID(playerID);
 
         if(player == null){
-            System.out.println("No Player found with the provided Player ID");
+            System.out.println("No LineupPlayer found with the provided LineupPlayer ID");
             playerRepository.save(requester.requestPlayerStatsByPlayerID(playerID));
         } else {
             System.out.println("Data found");
