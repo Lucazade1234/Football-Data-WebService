@@ -30,6 +30,9 @@ public class FixtureService {
 
 
         return fixtureRepository.findFixturesByTeamIDsContains(teamID);
+    }
 
+    public void deleteAllItems(){
+        fixtureRepository.deleteAll();
     }
 }

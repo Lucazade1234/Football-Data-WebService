@@ -28,4 +28,8 @@ public class LeagueService {
         }
         return leagueRepository.findLeagueByCountry(country);
     }
+
+    public void deleteAllItems(){
+        leagueRepository.deleteAll();
+    }
 }

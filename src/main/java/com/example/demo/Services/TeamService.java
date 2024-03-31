@@ -29,4 +29,8 @@ public class TeamService {
         return teamRepository.findTeamsByCountryAndLeagueID(country,leagueID);
     }
 
+    public void deleteAllItems(){
+        teamRepository.deleteAll();
+    }
+
 }

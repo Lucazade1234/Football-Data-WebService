@@ -33,4 +33,8 @@ public class LineupService {
 
         return lineupRepository.findLineupsByFixtureId(fixtureID);
     }
+
+    public void deleteAllItems(){
+        lineupRepository.deleteAll();
+    }
 }

@@ -1,12 +1,10 @@
 package com.example.demo.controllers;
 
+import com.example.demo.Repositories.PlayerRepository;
 import com.example.demo.Services.*;
 import com.example.demo.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +55,7 @@ public class Controller {
 
     @GetMapping("/{leagueID}/{teamID}/TeamStats")
     public TeamStat getTeamStats(@PathVariable int leagueID, @PathVariable int teamID) throws InterruptedException {
-        return teamStatService.getTeamStats(leagueID, teamID);
+        return teamStatService.getTeamStats(teamID, leagueID);
     }
 
     @GetMapping("/Squad/{teamID}")
@@ -78,6 +76,17 @@ public class Controller {
     @GetMapping("/PlayerStats/{playerID}")
     public Player getPlayerStats(@PathVariable int playerID) throws InterruptedException {
         return playerService.getPlayer(playerID);
+    }
+
+    @PutMapping("/Cache/flush")
+    public void clearCache(){
+        fixtureService.deleteAllItems();
+        lineupService.deleteAllItems();
+        playerService.deleteAllItems();
+        squadService.deleteAllItems();
+        teamService.deleteAllItems();
+        teamStatService.deleteAllItems();
+        leagueService.deleteAllItems();
     }
 
 

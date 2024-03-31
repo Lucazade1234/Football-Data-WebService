@@ -21,4 +21,8 @@ public class TeamStatService {
         }
         return teamStatRepository.findTeamStatByTeam_IdAndLeague_Id(teamID, leagueID);
     }
+
+    public void deleteAllItems(){
+        teamStatRepository.deleteAll();
+    }
 }

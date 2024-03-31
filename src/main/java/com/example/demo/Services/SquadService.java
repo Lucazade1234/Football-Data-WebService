@@ -23,4 +23,8 @@ public class SquadService {
         }
         return squadRepository.findSquadByTeamID(teamID);
     }
+
+    public void deleteAllItems(){
+        squadRepository.deleteAll();
+    }
 }

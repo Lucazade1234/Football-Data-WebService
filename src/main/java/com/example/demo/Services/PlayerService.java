@@ -25,4 +25,8 @@ public class PlayerService {
 
         return playerRepository.findPlayerByPlayerID(playerID);
     }
+
+    public void deleteAllItems(){
+        playerRepository.deleteAll();
+    }
 }
