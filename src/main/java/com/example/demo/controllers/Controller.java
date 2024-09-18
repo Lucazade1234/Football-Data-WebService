@@ -89,13 +89,4 @@ public class Controller {
         leagueService.deleteAllItems();
     }
 
-
-
-    @GetMapping("/leagues")
-    public List<League> getAllLeagues() {
-        return leagueService.getAllLeagues();
-    }
-
-
-
 }
